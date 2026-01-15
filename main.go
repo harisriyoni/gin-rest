@@ -2,6 +2,7 @@ package main
 
 import (
 	"gin-rest/book"
+	"gin-rest/handler"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -19,28 +20,17 @@ func main() {
 	db.AutoMigrate(&book.Book{})
 
 	bookRepository := book.NewRepository(db)
+	// bookFileRepositry := book.NewFileRepository()
 	bookService := book.NewBookService(bookRepository)
-	bookRequest := book.BookRequest{
-		Title: "yayaya",
-		Price: "9000",
-		// Description: "asjkdnjkas",
-		// Rating:      5,
-	}
-
-	bookService.Create(bookRequest)
-	// books, err := bookRepository.FindAll()
-
-	// for _, book := range books {
-	// 	fmt.Println("Tittle:", book.Title)
-	// }
+	bookHandler := handler.NewBookHandler(bookService)
 
 	router := gin.Default()
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello World",
-		})
-	})
+	router.GET("/books", bookHandler.GetBooks)
+	router.GET("/books/:id", bookHandler.GetBook)
+	router.POST("/books", bookHandler.CreateBook)
+	router.PUT("/books/:id", bookHandler.UpdateBook)
+	router.DELETE("/books/:id", bookHandler.DeleteBook)
 
 	router.Run(":8080")
 }
